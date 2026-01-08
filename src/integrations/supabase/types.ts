@@ -122,36 +122,66 @@ export type Database = {
       }
       profiles: {
         Row: {
+          allergies: string | null
+          blood_type: string | null
+          chronic_diseases: string | null
           created_at: string
           date_of_birth: string | null
           email: string
           emergency_contact: string | null
           emergency_phone: string | null
+          father_name: string | null
+          father_national_id: string | null
           full_name: string
+          gender: string | null
           id: string
+          mother_name: string | null
+          mother_national_id: string | null
+          national_id: string | null
           phone: string | null
+          previous_surgeries: string | null
           updated_at: string
         }
         Insert: {
+          allergies?: string | null
+          blood_type?: string | null
+          chronic_diseases?: string | null
           created_at?: string
           date_of_birth?: string | null
           email: string
           emergency_contact?: string | null
           emergency_phone?: string | null
+          father_name?: string | null
+          father_national_id?: string | null
           full_name: string
+          gender?: string | null
           id: string
+          mother_name?: string | null
+          mother_national_id?: string | null
+          national_id?: string | null
           phone?: string | null
+          previous_surgeries?: string | null
           updated_at?: string
         }
         Update: {
+          allergies?: string | null
+          blood_type?: string | null
+          chronic_diseases?: string | null
           created_at?: string
           date_of_birth?: string | null
           email?: string
           emergency_contact?: string | null
           emergency_phone?: string | null
+          father_name?: string | null
+          father_national_id?: string | null
           full_name?: string
+          gender?: string | null
           id?: string
+          mother_name?: string | null
+          mother_national_id?: string | null
+          national_id?: string | null
           phone?: string | null
+          previous_surgeries?: string | null
           updated_at?: string
         }
         Relationships: []

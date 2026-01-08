@@ -4,12 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 
 type AppRole = 'swimmer' | 'coach';
 
+export interface ProfileFormData {
+  fullName: string;
+  nationalId: string;
+  dateOfBirth: string;
+  gender: string;
+  bloodType: string;
+  email: string;
+  password: string;
+  fatherName?: string;
+  fatherNationalId?: string;
+  motherName?: string;
+  motherNationalId?: string;
+  allergies?: string;
+  previousSurgeries?: string;
+  chronicDiseases?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: AppRole | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: AppRole) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, profileData: ProfileFormData, role: AppRole) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -72,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, selectedRole: AppRole) => {
+  const signUp = async (email: string, password: string, profileData: ProfileFormData, selectedRole: AppRole) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { data, error } = await supabase.auth.signUp({
@@ -88,11 +105,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     if (data.user) {
-      // Create profile
+      // Create profile with all fields
       const { error: profileError } = await supabase.from('profiles').insert({
         id: data.user.id,
         email,
-        full_name: fullName,
+        full_name: profileData.fullName,
+        national_id: profileData.nationalId,
+        date_of_birth: profileData.dateOfBirth,
+        gender: profileData.gender,
+        blood_type: profileData.bloodType,
+        father_name: profileData.fatherName || null,
+        father_national_id: profileData.fatherNationalId || null,
+        mother_name: profileData.motherName || null,
+        mother_national_id: profileData.motherNationalId || null,
+        allergies: profileData.allergies || null,
+        previous_surgeries: profileData.previousSurgeries || null,
+        chronic_diseases: profileData.chronicDiseases || null,
       });
 
       if (profileError) {
