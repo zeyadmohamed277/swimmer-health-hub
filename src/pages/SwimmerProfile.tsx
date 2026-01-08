@@ -3,11 +3,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { User, Phone, Calendar, AlertCircle } from 'lucide-react';
+import { User, Calendar, Phone, AlertCircle, Heart, Pill, Stethoscope, Syringe } from 'lucide-react';
+import { format } from 'date-fns';
 
 interface Profile {
   id: string;
@@ -17,76 +18,81 @@ interface Profile {
   phone: string | null;
   emergency_contact: string | null;
   emergency_phone: string | null;
+  national_id: string | null;
+  gender: string | null;
+  blood_type: string | null;
+  father_name: string | null;
+  father_national_id: string | null;
+  mother_name: string | null;
+  mother_national_id: string | null;
+  allergies: string | null;
+  previous_surgeries: string | null;
+  chronic_diseases: string | null;
 }
+
+interface MedicalResult {
+  id: string;
+  examination_date: string;
+  blood_pressure_systolic: number | null;
+  blood_pressure_diastolic: number | null;
+  heart_rate: number | null;
+  status: string | null;
+  notes: string | null;
+}
+
+const isAbnormalBloodPressure = (systolic: number | null, diastolic: number | null): boolean => {
+  if (systolic === null || diastolic === null) return false;
+  return systolic > 140 || systolic < 90 || diastolic > 90 || diastolic < 60;
+};
+
+const isAbnormalHeartRate = (heartRate: number | null): boolean => {
+  if (heartRate === null) return false;
+  return heartRate > 100 || heartRate < 60;
+};
 
 export default function SwimmerProfile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [medicalResults, setMedicalResults] = useState<MedicalResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: '',
-    date_of_birth: '',
-    phone: '',
-    emergency_contact: '',
-    emergency_phone: '',
-  });
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
+      fetchData();
     }
   }, [user]);
 
-  const fetchProfile = async () => {
+  const fetchData = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .maybeSingle();
+    const [profileRes, medicalRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+      supabase.from('medical_results').select('*').eq('swimmer_id', user.id).order('examination_date', { ascending: false }).limit(5),
+    ]);
 
-    if (error) {
-      console.error('Error fetching profile:', error);
+    if (profileRes.error) {
+      console.error('Error fetching profile:', profileRes.error);
       toast.error('Failed to load profile');
-    } else if (data) {
-      setProfile(data);
-      setFormData({
-        full_name: data.full_name || '',
-        date_of_birth: data.date_of_birth || '',
-        phone: data.phone || '',
-        emergency_contact: data.emergency_contact || '',
-        emergency_phone: data.emergency_phone || '',
-      });
+    } else if (profileRes.data) {
+      setProfile(profileRes.data);
     }
+
+    if (medicalRes.error) {
+      console.error('Error fetching medical results:', medicalRes.error);
+    } else {
+      setMedicalResults(medicalRes.data || []);
+    }
+
     setLoading(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    setSaving(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        full_name: formData.full_name,
-        date_of_birth: formData.date_of_birth || null,
-        phone: formData.phone || null,
-        emergency_contact: formData.emergency_contact || null,
-        emergency_phone: formData.emergency_phone || null,
-      })
-      .eq('id', user.id);
-
-    if (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    } else {
-      toast.success('Profile updated successfully');
-      fetchProfile();
-    }
-    setSaving(false);
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   if (loading) {
@@ -101,116 +107,171 @@ export default function SwimmerProfile() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-        <div>
-          <h1 className="text-3xl font-bold">My Profile</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your personal information
-          </p>
-        </div>
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+        {/* Profile Header */}
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
+                <AvatarImage src="" alt={profile?.full_name} />
+                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                  {profile?.full_name ? getInitials(profile.full_name) : <User className="w-10 h-10" />}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-center sm:text-left space-y-2">
+                <h1 className="text-3xl font-bold">{profile?.full_name || 'Swimmer'}</h1>
+                {profile?.date_of_birth && (
+                  <div className="flex items-center justify-center sm:justify-start gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>Born {format(new Date(profile.date_of_birth), 'MMMM d, yyyy')}</span>
+                  </div>
+                )}
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
+                  {profile?.blood_type && (
+                    <Badge variant="secondary">Blood Type: {profile.blood_type}</Badge>
+                  )}
+                  {profile?.gender && (
+                    <Badge variant="outline">{profile.gender}</Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Medical History Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Health Conditions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Personal Information
+                <Heart className="w-5 h-5 text-destructive" />
+                Medical History
               </CardTitle>
-              <CardDescription>
-                Your basic profile information
-              </CardDescription>
+              <CardDescription>Your health information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="full_name">Full Name</Label>
-                  <Input
-                    id="full_name"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    placeholder="Your full name"
-                  />
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <Pill className="w-5 h-5 text-orange-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Allergies</p>
+                    <p className="text-sm text-muted-foreground">
+                      {profile?.allergies || 'None reported'}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    value={profile?.email || ''}
-                    disabled
-                    className="bg-muted"
-                  />
+                <Separator />
+                <div className="flex items-start gap-3">
+                  <Syringe className="w-5 h-5 text-blue-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Previous Surgeries</p>
+                    <p className="text-sm text-muted-foreground">
+                      {profile?.previous_surgeries || 'None reported'}
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="date_of_birth" className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    Date of Birth
-                  </Label>
-                  <Input
-                    id="date_of_birth"
-                    type="date"
-                    value={formData.date_of_birth}
-                    onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center gap-2">
-                    <Phone className="w-4 h-4" />
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+1 (555) 123-4567"
-                  />
+                <Separator />
+                <div className="flex items-start gap-3">
+                  <Stethoscope className="w-5 h-5 text-purple-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Chronic Diseases</p>
+                    <p className="text-sm text-muted-foreground">
+                      {profile?.chronic_diseases || 'None reported'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Recent Medical Results */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
-                Emergency Contact
+                Recent Medical Results
               </CardTitle>
-              <CardDescription>
-                Who should we contact in case of emergency?
-              </CardDescription>
+              <CardDescription>Latest examination results</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="emergency_contact">Contact Name</Label>
-                  <Input
-                    id="emergency_contact"
-                    value={formData.emergency_contact}
-                    onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
-                    placeholder="Emergency contact name"
-                  />
+            <CardContent>
+              {medicalResults.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No medical results recorded yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {medicalResults.map((result) => {
+                    const bpAbnormal = isAbnormalBloodPressure(result.blood_pressure_systolic, result.blood_pressure_diastolic);
+                    const hrAbnormal = isAbnormalHeartRate(result.heart_rate);
+                    const hasAbnormal = bpAbnormal || hrAbnormal;
+
+                    return (
+                      <div
+                        key={result.id}
+                        className={`p-3 rounded-lg border ${
+                          hasAbnormal ? 'border-destructive/50 bg-destructive/5' : 'border-border'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-sm font-medium">
+                            {format(new Date(result.examination_date), 'MMM d, yyyy')}
+                          </span>
+                          {hasAbnormal && (
+                            <Badge variant="destructive" className="text-xs">
+                              Abnormal
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className={bpAbnormal ? 'text-destructive font-medium' : ''}>
+                            <span className="text-muted-foreground">BP: </span>
+                            {result.blood_pressure_systolic && result.blood_pressure_diastolic
+                              ? `${result.blood_pressure_systolic}/${result.blood_pressure_diastolic}`
+                              : 'N/A'}
+                          </div>
+                          <div className={hrAbnormal ? 'text-destructive font-medium' : ''}>
+                            <span className="text-muted-foreground">HR: </span>
+                            {result.heart_rate ? `${result.heart_rate} bpm` : 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="emergency_phone">Contact Phone</Label>
-                  <Input
-                    id="emergency_phone"
-                    type="tel"
-                    value={formData.emergency_phone}
-                    onChange={(e) => setFormData({ ...formData, emergency_phone: e.target.value })}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
+        </div>
 
-          <Button type="submit" disabled={saving} className="w-full sm:w-auto">
-            {saving ? 'Saving...' : 'Save Changes'}
-          </Button>
-        </form>
+        {/* Contact Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Phone className="w-5 h-5" />
+              Contact Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <p className="text-sm text-muted-foreground">Phone</p>
+                <p className="font-medium">{profile?.phone || 'Not provided'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-medium">{profile?.email}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Emergency Contact</p>
+                <p className="font-medium">{profile?.emergency_contact || 'Not provided'}</p>
+                {profile?.emergency_phone && (
+                  <p className="text-sm text-muted-foreground">{profile.emergency_phone}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
