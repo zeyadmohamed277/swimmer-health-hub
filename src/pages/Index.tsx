@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Waves, User, Users, Activity, Shield, TrendingUp } from 'lucide-react';
+import { Waves, User, Users, Activity, Shield, TrendingUp, Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function Index() {
   const { user, role, loading } = useAuth();

@@ -10,6 +10,9 @@ import { toast } from 'sonner';
 import { User, Calendar, Phone, AlertCircle, Heart, Pill, Stethoscope, Syringe } from 'lucide-react';
 import { format } from 'date-fns';
 
+
+
+
 interface Profile {
   id: string;
   email: string;
@@ -186,6 +189,26 @@ export default function SwimmerProfile() {
           </Card>
 
           {/* Recent Medical Results */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                Medical Records
+              </CardTitle>
+              <CardDescription>Upload and manage your medical files</CardDescription>
+            </CardHeader>
+            <CardContent>
+
+                <form action="/action_page.php">
+                <input type="file" id="myFile" name="filename"
+                accept='.pdf,.jpg,.jpeg,.png,.gif'
+                multiple
+                />
+                </form>
+            </CardContent>
+          </Card>
+
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
