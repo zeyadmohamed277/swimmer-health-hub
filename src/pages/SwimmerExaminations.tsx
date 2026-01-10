@@ -116,6 +116,7 @@ export default function SwimmerExaminations() {
                     </p>
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Muscle Mass</CardTitle>
@@ -130,6 +131,7 @@ export default function SwimmerExaminations() {
                     </p>
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Body Fat</CardTitle>
@@ -181,7 +183,7 @@ export default function SwimmerExaminations() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {inBodyExams.length === 0 ? (
+                {inBodyExams.length != 0 ? (
                   <p className="text-center py-8 text-muted-foreground">
                     No in-body examinations recorded yet
                   </p>
