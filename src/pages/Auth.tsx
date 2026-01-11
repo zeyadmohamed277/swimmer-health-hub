@@ -264,7 +264,13 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 gradient-surface">
       
-      <Card className="w-full max-w-2xl shadow-lg border-border/50 dark:bg-black dark:border-neutral-800">
+  <Card style={{
+    backgroundImage: "url('../src/assets/Zamalek_SC_logo.svg.png')",
+    backgroundAttachment: "fixed",
+    backgroundSize: "350px",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }} className="w-full max-w-2xl shadow-lg border-border/50 dark:bg-black dark:border-neutral-800">
       <button
           onClick={toggleLanguage}
           className="
@@ -281,10 +287,10 @@ export default function Auth() {
             <Waves className="w-8 h-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-3xl text-red-600 font-bold">
               {isLogin ? t("Auth.title") : t("Auth.CreateAccount")}
             </CardTitle>
-            <CardDescription className="mt-2">
+            <CardDescription className="text-black text-bold mt-2">
               {isLogin
                 ? t("Auth.subtitle")
                 : `Step ${currentSection} of 3: ${
@@ -361,7 +367,7 @@ export default function Auth() {
                         <Input
                           id="fullName"
                           type="text"
-                          placeholder="John Doe"
+                          placeholder={t("Auth.name")}
                           value={formData.fullName}
                           onChange={(e) =>
                             updateFormData("fullName", e.target.value)
@@ -382,7 +388,7 @@ export default function Auth() {
                         <Input
                           id="nationalId"
                           type="text"
-                          placeholder="Enter National ID"
+                          placeholder={t("Auth.PNID")}
                           value={formData.nationalId}
                           onChange={(e) =>
                             updateFormData("nationalId", e.target.value)

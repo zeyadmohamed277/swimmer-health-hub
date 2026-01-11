@@ -72,8 +72,8 @@
     "ChronicDiseases":"الأمراض المزمنة",
     "CreateAccount":"إنشاء حساب",
     "PersonalInfo":"المعلومات الشخصية",
-    "ParentInfo":"معلومات الوالدين"
-
+    "ParentInfo":"معلومات الوالدين",
+    "PNID":"ادخل الرقم القومي"
   },
   "medical": {
     "records": "السجلات الطبية",

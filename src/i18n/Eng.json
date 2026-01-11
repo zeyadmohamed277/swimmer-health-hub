@@ -73,7 +73,8 @@
     "ChronicDiseases":"Chronic Diseases",
     "CreateAccount":"Create Account",
     "PersonalInfo":"Personal Information",
-    "ParentInfo":"Parent's Information"
+    "ParentInfo":"Parent's Information",
+    "PNID":"Enter National ID"
   },
   "medical": {
     "records": "Medical Records",
