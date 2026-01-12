@@ -19,9 +19,17 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Waves, User, Users, ChevronRight, ChevronLeft, Award } from "lucide-react";
+import {
+  Waves,
+  User,
+  Users,
+  ChevronRight,
+  ChevronLeft,
+  Award,
+} from "lucide-react";
 import { z } from "zod";
-import ZSC from "../assets/Zamalek_SC_logo.svg.png"
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/Context/LanguageContext";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -58,6 +66,11 @@ export default function Auth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const navigate = useNavigate();
+
+  const { t } = useTranslation();
+  const { lang, toggleLanguage } = useLanguage();
+
+  if (!lang) return null; // safe now
 
   // Swimmer form data
   const [formData, setFormData] = useState<SignupFormData>({
@@ -116,7 +129,10 @@ export default function Auth() {
       if (!formData.bloodType) {
         newErrors.bloodType = "Blood type is required";
       }
-      if (!formData.email || !z.string().email().safeParse(formData.email).success) {
+      if (
+        !formData.email ||
+        !z.string().email().safeParse(formData.email).success
+      ) {
         newErrors.email = "Please enter a valid email address";
       }
       if (!formData.password || formData.password.length < 6) {
@@ -203,18 +219,28 @@ export default function Auth() {
     return (
       <div className="min-h-screen gradient-ocean-vertical flex items-center justify-center p-4">
         <div className="w-full max-w-4xl">
+          <button
+                  onClick={toggleLanguage}
+                  className="
+        px-3 py-1 rounded-md text-sm font-semibold
+        border border-gray-300 dark:border-gray-700
+        hover:bg-gray-100 dark:hover:bg-gray-800
+        text-black
+      "
+                >
+                  {lang === "en" ? "AR" : "EN"}
+                </button>
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
               <div className="p-4 gradient-ocean backdrop-blur-sm rounded-full animate-float">
+                
                 <Waves className="w-16 h-16 text-white " />
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold  mb-4">
-              Welcome to SwimHealth
+              {t("Auth.title")}
             </h1>
-            <p className="text-xl ">
-              Choose your role to get started
-            </p>
+            <p className="text-xl">{t("Auth.subtitle")}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -227,12 +253,14 @@ export default function Auth() {
                 <div className="p-4 gradient-ocean rounded-full">
                   <User className="w-12 h-12 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">I'm a Swimmer</h2>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("Auth.IamSwimmer")}
+                </h2>
                 <p className="text-muted-foreground">
-                  Join as a swimmer to track your progress, view training schedules, and connect with your coach.
+                  {t("Auth.Sdesc")}
                 </p>
                 <Button className="gradient-ocean text-white mt-4 w-full">
-                  Continue as Swimmer
+                  {t("Auth.Scon")}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -247,12 +275,14 @@ export default function Auth() {
                 <div className="p-4 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full">
                   <Award className="w-12 h-12 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">I'm a Coach</h2>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {t("Auth.IamCoach")}
+                </h2>
                 <p className="text-muted-foreground">
-                  Sign in as a coach to manage your swimmers, create training plans, and track team performance.
+                  {t("Auth.Cdesc")}
                 </p>
                 <Button className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white mt-4 w-full">
-                  Continue as Coach
+                  {t("Auth.Ccon")}
                   <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>
@@ -267,8 +297,18 @@ export default function Auth() {
   if (role === "coach") {
     return (
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-amber-50 flex items-center justify-center p-4">
-        <Card 
-        className="w-full max-w-md shadow-xl border-0">
+        <Card className="w-full max-w-md shadow-xl border-0">
+           <button
+                  onClick={toggleLanguage}
+                  className="
+        px-3 py-1 rounded-md text-sm font-semibold
+        border border-gray-300 dark:border-gray-700
+        hover:bg-gray-100 dark:hover:bg-gray-800
+        text-black m-5
+      "
+                >
+                  {lang === "en" ? "AR" : "EN"}
+                </button>
           <CardHeader className="text-center pb-2">
             <button
               onClick={handleBackToRoleSelection}
@@ -281,20 +321,20 @@ export default function Auth() {
                 <Award className="w-8 h-8 text-white" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Coach Sign In</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t("Auth.CSignup")}</CardTitle>
             <CardDescription>
-              Enter your credentials to access the dashboard
+              {t("Auth.CSdesc")}
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleCoachSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("Auth.name")}</Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Enter your name"
+                  placeholder={t("Auth.name")}
                   value={coachData.name}
                   onChange={(e) => updateCoachData("name", e.target.value)}
                   className={errors.name ? "border-destructive" : ""}
@@ -305,11 +345,11 @@ export default function Auth() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("Auth.Password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("Auth.Password")}
                   value={coachData.password}
                   onChange={(e) => updateCoachData("password", e.target.value)}
                   className={errors.password ? "border-destructive" : ""}
@@ -324,7 +364,7 @@ export default function Auth() {
                 className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Signing in..." : "Sign In to Dashboard"}
+                {isSubmitting ? "Signing in..." : t("buttons.Continue")}
               </Button>
             </form>
           </CardContent>
@@ -349,7 +389,9 @@ export default function Auth() {
               <Waves className="w-8 h-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Swimmer Registration</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Swimmer Registration
+          </CardTitle>
           <CardDescription>
             Step {currentSection} of 3:{" "}
             {currentSection === 1
@@ -386,11 +428,15 @@ export default function Auth() {
                       id="fullName"
                       placeholder="Enter your full name"
                       value={formData.fullName}
-                      onChange={(e) => updateFormData("fullName", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("fullName", e.target.value)
+                      }
                       className={errors.fullName ? "border-destructive" : ""}
                     />
                     {errors.fullName && (
-                      <p className="text-xs text-destructive">{errors.fullName}</p>
+                      <p className="text-xs text-destructive">
+                        {errors.fullName}
+                      </p>
                     )}
                   </div>
 
@@ -400,11 +446,15 @@ export default function Auth() {
                       id="nationalId"
                       placeholder="Enter your national ID"
                       value={formData.nationalId}
-                      onChange={(e) => updateFormData("nationalId", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("nationalId", e.target.value)
+                      }
                       className={errors.nationalId ? "border-destructive" : ""}
                     />
                     {errors.nationalId && (
-                      <p className="text-xs text-destructive">{errors.nationalId}</p>
+                      <p className="text-xs text-destructive">
+                        {errors.nationalId}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -416,11 +466,15 @@ export default function Auth() {
                       id="dateOfBirth"
                       type="date"
                       value={formData.dateOfBirth}
-                      onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
+                      onChange={(e) =>
+                        updateFormData("dateOfBirth", e.target.value)
+                      }
                       className={errors.dateOfBirth ? "border-destructive" : ""}
                     />
                     {errors.dateOfBirth && (
-                      <p className="text-xs text-destructive">{errors.dateOfBirth}</p>
+                      <p className="text-xs text-destructive">
+                        {errors.dateOfBirth}
+                      </p>
                     )}
                   </div>
 
@@ -430,7 +484,9 @@ export default function Auth() {
                       value={formData.gender}
                       onValueChange={(value) => updateFormData("gender", value)}
                     >
-                      <SelectTrigger className={errors.gender ? "border-destructive" : ""}>
+                      <SelectTrigger
+                        className={errors.gender ? "border-destructive" : ""}
+                      >
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent>
@@ -442,7 +498,9 @@ export default function Auth() {
                       </SelectContent>
                     </Select>
                     {errors.gender && (
-                      <p className="text-xs text-destructive">{errors.gender}</p>
+                      <p className="text-xs text-destructive">
+                        {errors.gender}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -452,9 +510,13 @@ export default function Auth() {
                     <Label>Blood Type *</Label>
                     <Select
                       value={formData.bloodType}
-                      onValueChange={(value) => updateFormData("bloodType", value)}
+                      onValueChange={(value) =>
+                        updateFormData("bloodType", value)
+                      }
                     >
-                      <SelectTrigger className={errors.bloodType ? "border-destructive" : ""}>
+                      <SelectTrigger
+                        className={errors.bloodType ? "border-destructive" : ""}
+                      >
                         <SelectValue placeholder="Select blood type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -466,7 +528,9 @@ export default function Auth() {
                       </SelectContent>
                     </Select>
                     {errors.bloodType && (
-                      <p className="text-xs text-destructive">{errors.bloodType}</p>
+                      <p className="text-xs text-destructive">
+                        {errors.bloodType}
+                      </p>
                     )}
                   </div>
 
@@ -497,7 +561,9 @@ export default function Auth() {
                     className={errors.password ? "border-destructive" : ""}
                   />
                   {errors.password && (
-                    <p className="text-xs text-destructive">{errors.password}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.password}
+                    </p>
                   )}
                 </div>
               </div>
@@ -518,16 +584,22 @@ export default function Auth() {
                         id="fatherName"
                         placeholder="Enter father's name"
                         value={formData.fatherName}
-                        onChange={(e) => updateFormData("fatherName", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("fatherName", e.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="fatherNationalId">Father's National ID</Label>
+                      <Label htmlFor="fatherNationalId">
+                        Father's National ID
+                      </Label>
                       <Input
                         id="fatherNationalId"
                         placeholder="Enter father's national ID"
                         value={formData.fatherNationalId}
-                        onChange={(e) => updateFormData("fatherNationalId", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("fatherNationalId", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -545,16 +617,22 @@ export default function Auth() {
                         id="motherName"
                         placeholder="Enter mother's name"
                         value={formData.motherName}
-                        onChange={(e) => updateFormData("motherName", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("motherName", e.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="motherNationalId">Mother's National ID</Label>
+                      <Label htmlFor="motherNationalId">
+                        Mother's National ID
+                      </Label>
                       <Input
                         id="motherNationalId"
                         placeholder="Enter mother's national ID"
                         value={formData.motherNationalId}
-                        onChange={(e) => updateFormData("motherNationalId", e.target.value)}
+                        onChange={(e) =>
+                          updateFormData("motherNationalId", e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -571,7 +649,9 @@ export default function Auth() {
                     id="allergies"
                     placeholder="List any allergies you have"
                     value={formData.allergies}
-                    onChange={(e) => updateFormData("allergies", e.target.value)}
+                    onChange={(e) =>
+                      updateFormData("allergies", e.target.value)
+                    }
                     rows={3}
                   />
                 </div>
@@ -582,7 +662,9 @@ export default function Auth() {
                     id="previousSurgeries"
                     placeholder="List any previous surgeries"
                     value={formData.previousSurgeries}
-                    onChange={(e) => updateFormData("previousSurgeries", e.target.value)}
+                    onChange={(e) =>
+                      updateFormData("previousSurgeries", e.target.value)
+                    }
                     rows={3}
                   />
                 </div>
@@ -593,7 +675,9 @@ export default function Auth() {
                     id="chronicDiseases"
                     placeholder="List any chronic diseases"
                     value={formData.chronicDiseases}
-                    onChange={(e) => updateFormData("chronicDiseases", e.target.value)}
+                    onChange={(e) =>
+                      updateFormData("chronicDiseases", e.target.value)
+                    }
                     rows={3}
                   />
                 </div>

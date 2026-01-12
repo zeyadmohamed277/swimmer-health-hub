@@ -39,7 +39,8 @@
     "changeLang": "Change Language",
     "SignIn": "Sign In",
     "Next": "Next",
-    "Previous": "Previous"
+    "Previous": "Previous",
+    "Continue":"Continue"
   },
   "profile": {
     "title": "Profile",
@@ -48,8 +49,8 @@
     "phone": "Phone Number"
   },
   "Auth": {
-    "title":"Welcome Back",
-    "subtitle":"Sign in to access your swimmer health dashboard",
+    "title":"Welcome to SwimHealth",
+    "subtitle":"Choose your role to get started",
     "name": "Full Name",
     "age": "Age",
     "gender": "Gender",
@@ -59,9 +60,12 @@
     "nationalId": "National ID",
     "bloodType": "Blood Type",
     "allergies": "Allergies",
-    "Iam":"I am  ",
-    "Swimmer":"Swimmer",
-    "Coach":"Coach",
+    "IamSwimmer":"I am a Swimmer",
+    "Sdesc":"Join as a swimmer to track your progress, view training plans, and manage your health records.",
+    "Scon":"Continue as Swimmer",
+    "IamCoach":"I am a Coach",
+    "Cdesc":"Sign in as a coach to manage your swimmers, create training schedules, and monitor health metrics.",
+    "Ccon":"Continue as Coach",
     "FatherInfo":"Father's Information",
     "MotherInfo":"Mother's Information",
     "Fname":"Father's Name",
@@ -74,7 +78,10 @@
     "CreateAccount":"Create Account",
     "PersonalInfo":"Personal Information",
     "ParentInfo":"Parent's Information",
-    "PNID":"Enter National ID"
+    "PNID":"Enter National ID",
+    "CSignup":"Coach Sign Up",
+    "CSdesc":"Enter your credentials to access the dashboard",
+    "SSignup":"Swimmer Sign Up"
   },
   "medical": {
     "records": "Medical Records",
