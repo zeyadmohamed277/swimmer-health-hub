@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -21,13 +19,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Waves, User, Users, ChevronRight, ChevronLeft } from "lucide-react";
+import { Waves, User, Users, ChevronRight, ChevronLeft, Award } from "lucide-react";
 import { z } from "zod";
-import { useTranslation } from "react-i18next";
-import { useLanguage } from "@/Context/LanguageContext";
+import ZSC from "../assets/Zamalek_SC_logo.svg.png"
 
 const signupSchema = z.object({
-  // Section 1: Personal Information
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   nationalId: z.string().min(5, "National ID is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
@@ -35,40 +31,35 @@ const signupSchema = z.object({
   bloodType: z.string().min(1, "Blood type is required"),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  // Section 2: Parent's Information (optional for coaches)
   fatherName: z.string().optional(),
   fatherNationalId: z.string().optional(),
   motherName: z.string().optional(),
   motherNationalId: z.string().optional(),
-  // Section 3: Medical History (optional)
   allergies: z.string().optional(),
   previousSurgeries: z.string().optional(),
   chronicDiseases: z.string().optional(),
 });
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+
+const coachSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type AppRole = "swimmer" | "coach";
+type AppRole = "swimmer" | "coach" | null;
 type SignupFormData = z.infer<typeof signupSchema>;
-type FormErrors = Partial<Record<keyof SignupFormData, string>>;
+type FormErrors = Partial<Record<keyof SignupFormData | "name", string>>;
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const GENDERS = ["Male", "Female"];
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [role, setRole] = useState<AppRole>(null);
   const [currentSection, setCurrentSection] = useState(1);
-  const [role, setRole] = useState<AppRole>("swimmer");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const navigate = useNavigate();
 
-  const { t } = useTranslation();
-  const { lang, toggleLanguage } = useLanguage();
-
-  if (!lang) return null; // safe now
-  // Form fields
+  // Swimmer form data
   const [formData, setFormData] = useState<SignupFormData>({
     fullName: "",
     nationalId: "",
@@ -86,17 +77,21 @@ export default function Auth() {
     chronicDiseases: "",
   });
 
-  const { signIn, signUp, user, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate("/");
-    }
-  }, [user, loading, navigate]);
+  // Coach form data
+  const [coachData, setCoachData] = useState({
+    name: "",
+    password: "",
+  });
 
   const updateFormData = (field: keyof SignupFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const updateCoachData = (field: "name" | "password", value: string) => {
+    setCoachData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -109,7 +104,7 @@ export default function Auth() {
       if (!formData.fullName || formData.fullName.length < 2) {
         newErrors.fullName = "Full name must be at least 2 characters";
       }
-      if (!formData.nationalId || formData.nationalId.length < 14) {
+      if (!formData.nationalId || formData.nationalId.length < 5) {
         newErrors.nationalId = "National ID is required";
       }
       if (!formData.dateOfBirth) {
@@ -121,10 +116,7 @@ export default function Auth() {
       if (!formData.bloodType) {
         newErrors.bloodType = "Blood type is required";
       }
-      if (
-        !formData.email ||
-        !z.string().email().safeParse(formData.email).success
-      ) {
+      if (!formData.email || !z.string().email().safeParse(formData.email).success) {
         newErrors.email = "Please enter a valid email address";
       }
       if (!formData.password || formData.password.length < 6) {
@@ -136,23 +128,18 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateLogin = (): boolean => {
-    try {
-      loginSchema.parse({ email: formData.email, password: formData.password });
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors: FormErrors = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            fieldErrors[err.path[0] as keyof FormErrors] = err.message;
-          }
-        });
-        setErrors(fieldErrors);
-      }
-      return false;
+  const validateCoachForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    if (!coachData.name || coachData.name.length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
     }
+    if (!coachData.password || coachData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = () => {
@@ -165,532 +152,457 @@ export default function Auth() {
     setCurrentSection((prev) => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSwimmerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isLogin) {
-      if (!validateLogin()) return;
-    } else if (currentSection < 3) {
+    if (currentSection < 3) {
       handleNext();
       return;
     }
 
     setIsSubmitting(true);
-
     try {
-      if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast.error("Invalid email or password");
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success("Welcome back!");
-          navigate("/");
-        }
-      } else {
-        const { error } = await signUp(
-          formData.email,
-          formData.password,
-          {
-            fullName: formData.fullName,
-            nationalId: formData.nationalId,
-            dateOfBirth: formData.dateOfBirth,
-            gender: formData.gender,
-            bloodType: formData.bloodType,
-            email: formData.email,
-            password: formData.password,
-            fatherName: formData.fatherName,
-            fatherNationalId: formData.fatherNationalId,
-            motherName: formData.motherName,
-            motherNationalId: formData.motherNationalId,
-            allergies: formData.allergies,
-            previousSurgeries: formData.previousSurgeries,
-            chronicDiseases: formData.chronicDiseases,
-          },
-          role
-        );
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast.error(
-              "This email is already registered. Please sign in instead."
-            );
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success("Account created successfully!");
-          navigate("/");
-        }
-      }
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Account created successfully!");
+      navigate("/profile");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      fullName: "",
-      nationalId: "",
-      dateOfBirth: "",
-      gender: "",
-      bloodType: "",
-      email: "",
-      password: "",
-      fatherName: "",
-      fatherNationalId: "",
-      motherName: "",
-      motherNationalId: "",
-      allergies: "",
-      previousSurgeries: "",
-      chronicDiseases: "",
-    });
+  const handleCoachSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateCoachForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Welcome, Coach!");
+      navigate("/dashboard");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRoleSelect = (selectedRole: AppRole) => {
+    setRole(selectedRole);
+    setErrors({});
+  };
+
+  const handleBackToRoleSelection = () => {
+    setRole(null);
     setCurrentSection(1);
     setErrors({});
   };
 
-  if (loading) {
+  // Role Selection Screen
+  if (!role) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className="min-h-screen gradient-ocean-vertical flex items-center justify-center p-4">
+        <div className="w-full max-w-4xl">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <div className="p-4 gradient-ocean backdrop-blur-sm rounded-full animate-float">
+                <Waves className="w-16 h-16 text-white " />
+              </div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold  mb-4">
+              Welcome to SwimHealth
+            </h1>
+            <p className="text-xl ">
+              Choose your role to get started
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Swimmer Card */}
+            <div
+              onClick={() => handleRoleSelect("swimmer")}
+              className="role-card role-card-swimmer bg-white/95 backdrop-blur-sm"
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="p-4 gradient-ocean rounded-full">
+                  <User className="w-12 h-12 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground">I'm a Swimmer</h2>
+                <p className="text-muted-foreground">
+                  Join as a swimmer to track your progress, view training schedules, and connect with your coach.
+                </p>
+                <Button className="gradient-ocean text-white mt-4 w-full">
+                  Continue as Swimmer
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Coach Card */}
+            <div
+              onClick={() => handleRoleSelect("coach")}
+              className="role-card role-card-coach bg-white/95 backdrop-blur-sm"
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="p-4 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full">
+                  <Award className="w-12 h-12 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground">I'm a Coach</h2>
+                <p className="text-muted-foreground">
+                  Sign in as a coach to manage your swimmers, create training plans, and track team performance.
+                </p>
+                <Button className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white mt-4 w-full">
+                  Continue as Coach
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // const { theme, toggleTheme } = useTheme();
-
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4 gradient-surface">
-      
-  <Card style={{
-    backgroundImage: "url('../src/assets/Zamalek_SC_logo.svg.png')",
-    backgroundAttachment: "fixed",
-    backgroundSize: "350px",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  }} className="w-full max-w-2xl shadow-lg border-border/50 dark:bg-black dark:border-neutral-800">
-      <button
-          onClick={toggleLanguage}
-          className="
-        px-3 py-1 rounded-md text-sm font-semibold
-        border border-gray-300 dark:border-gray-700
-        hover:bg-gray-100 dark:hover:bg-gray-800
-        text-black mr-4 ml-4 mt-4
-      "
-        >
-          {lang === "en" ? "AR" : "EN"}
-        </button>
-        <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-16 h-16 rounded-full gradient-ocean flex items-center justify-center">
-            <Waves className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <div>
-            <CardTitle className="text-3xl text-red-600 font-bold">
-              {isLogin ? t("Auth.title") : t("Auth.CreateAccount")}
-            </CardTitle>
-            <CardDescription className="text-black text-bold mt-2">
-              {isLogin
-                ? t("Auth.subtitle")
-                : `Step ${currentSection} of 3: ${
-                    currentSection === 1
-                      ? t("Auth.PersonalInfo")
-                      : currentSection === 2
-                      ? "Parent's Information"
-                      : "Medical History"
-                  }`}
-            </CardDescription>
-          </div>
-
-          {!isLogin && (
-            <div className="flex justify-center gap-2 pt-2 ">
-              {[1, 2, 3].map((step) => (
-                <div
-                  key={step}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    step === currentSection
-                      ? "bg-primary"
-                      : step < currentSection
-                      ? "bg-primary/50"
-                      : "bg-muted"
-                  }`}
-                />
-              ))}
+  // Coach Form
+  if (role === "coach") {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-amber-50 flex items-center justify-center p-4">
+        <Card 
+        className="w-full max-w-md shadow-xl border-0">
+          <CardHeader className="text-center pb-2">
+            <button
+              onClick={handleBackToRoleSelection}
+              className="absolute top-4 left-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-gradient-to-r from-orange-400 to-amber-500 rounded-full">
+                <Award className="w-8 h-8 text-white" />
+              </div>
             </div>
-          )}
+            <CardTitle className="text-2xl font-bold">Coach Sign In</CardTitle>
+            <CardDescription>
+              Enter your credentials to access the dashboard
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleCoachSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your name"
+                  value={coachData.name}
+                  onChange={(e) => updateCoachData("name", e.target.value)}
+                  className={errors.name ? "border-destructive" : ""}
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={coachData.password}
+                  onChange={(e) => updateCoachData("password", e.target.value)}
+                  className={errors.password ? "border-destructive" : ""}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Signing in..." : "Sign In to Dashboard"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Swimmer Multi-Step Form
+  return (
+    <div className="min-h-screen gradient-ocean-vertical flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg shadow-xl border-0">
+        <CardHeader className="text-center pb-2 relative">
+          <button
+            onClick={handleBackToRoleSelection}
+            className="absolute top-4 left-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex justify-center mb-4">
+            <div className="p-3 gradient-ocean rounded-full">
+              <Waves className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold">Swimmer Registration</CardTitle>
+          <CardDescription>
+            Step {currentSection} of 3:{" "}
+            {currentSection === 1
+              ? "Personal Information"
+              : currentSection === 2
+              ? "Parent's Information"
+              : "Medical History"}
+          </CardDescription>
+
+          {/* Progress Steps */}
+          <div className="flex justify-center gap-2 mt-4">
+            {[1, 2, 3].map((step) => (
+              <div
+                key={step}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  step <= currentSection
+                    ? "gradient-ocean scale-100"
+                    : "bg-muted scale-90"
+                }`}
+              />
+            ))}
+          </div>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4 ">
-            {isLogin ? (
-              <>
-                <div className="space-y-2 ">
-                  <Label htmlFor="email">{t("Auth.email")}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={(e) => updateFormData("email", e.target.value)}
-                    className={errors.email ? "border-destructive" : ""}
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
-                  )}
+          <form onSubmit={handleSwimmerSubmit} className="space-y-4">
+            {/* Section 1: Personal Information */}
+            {currentSection === 1 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input
+                      id="fullName"
+                      placeholder="Enter your full name"
+                      value={formData.fullName}
+                      onChange={(e) => updateFormData("fullName", e.target.value)}
+                      className={errors.fullName ? "border-destructive" : ""}
+                    />
+                    {errors.fullName && (
+                      <p className="text-xs text-destructive">{errors.fullName}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="nationalId">National ID *</Label>
+                    <Input
+                      id="nationalId"
+                      placeholder="Enter your national ID"
+                      value={formData.nationalId}
+                      onChange={(e) => updateFormData("nationalId", e.target.value)}
+                      className={errors.nationalId ? "border-destructive" : ""}
+                    />
+                    {errors.nationalId && (
+                      <p className="text-xs text-destructive">{errors.nationalId}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                    <Input
+                      id="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
+                      className={errors.dateOfBirth ? "border-destructive" : ""}
+                    />
+                    {errors.dateOfBirth && (
+                      <p className="text-xs text-destructive">{errors.dateOfBirth}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Gender *</Label>
+                    <Select
+                      value={formData.gender}
+                      onValueChange={(value) => updateFormData("gender", value)}
+                    >
+                      <SelectTrigger className={errors.gender ? "border-destructive" : ""}>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GENDERS.map((g) => (
+                          <SelectItem key={g} value={g}>
+                            {g}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.gender && (
+                      <p className="text-xs text-destructive">{errors.gender}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Blood Type *</Label>
+                    <Select
+                      value={formData.bloodType}
+                      onValueChange={(value) => updateFormData("bloodType", value)}
+                    >
+                      <SelectTrigger className={errors.bloodType ? "border-destructive" : ""}>
+                        <SelectValue placeholder="Select blood type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BLOOD_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.bloodType && (
+                      <p className="text-xs text-destructive">{errors.bloodType}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      className={errors.email ? "border-destructive" : ""}
+                    />
+                    {errors.email && (
+                      <p className="text-xs text-destructive">{errors.email}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">{t("Auth.Password")}</Label>
+                  <Label htmlFor="password">Password *</Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="At least 6 characters"
                     value={formData.password}
                     onChange={(e) => updateFormData("password", e.target.value)}
                     className={errors.password ? "border-destructive" : ""}
                   />
                   {errors.password && (
-                    <p className="text-sm text-destructive">
-                      {errors.password}
-                    </p>
+                    <p className="text-xs text-destructive">{errors.password}</p>
                   )}
                 </div>
-              </>
-            ) : (
-              <>
-                {!isLogin && currentSection === 1 && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="fullName">{t("Auth.name")}</Label>
-                        <Input
-                          id="fullName"
-                          type="text"
-                          placeholder={t("Auth.name")}
-                          value={formData.fullName}
-                          onChange={(e) =>
-                            updateFormData("fullName", e.target.value)
-                          }
-                          className={
-                            errors.fullName ? "border-destructive" : ""
-                          }
-                        />
-                        {errors.fullName && (
-                          <p className="text-sm text-destructive">
-                            {errors.fullName}
-                          </p>
-                        )}
-                      </div>
+              </div>
+            )}
 
-                      <div className="space-y-2">
-                        <Label htmlFor="nationalId">{t("Auth.nationalId")}</Label>
-                        <Input
-                          id="nationalId"
-                          type="text"
-                          placeholder={t("Auth.PNID")}
-                          value={formData.nationalId}
-                          onChange={(e) =>
-                            updateFormData("nationalId", e.target.value)
-                          }
-                          className={
-                            errors.nationalId ? "border-destructive" : ""
-                          }
-                        />
-                        {errors.nationalId && (
-                          <p className="text-sm text-destructive">
-                            {errors.nationalId}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="dateOfBirth">{t("Auth.DOB")}</Label>
-                        <Input
-                          id="dateOfBirth"
-                          type="date"
-                          value={formData.dateOfBirth}
-                          onChange={(e) =>
-                            updateFormData("dateOfBirth", e.target.value)
-                          }
-                          className={
-                            errors.dateOfBirth ? "border-destructive" : ""
-                          }
-                        />
-                        {errors.dateOfBirth && (
-                          <p className="text-sm text-destructive">
-                            {errors.dateOfBirth}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="gender">{t("Auth.gender")} *</Label>
-                        <Select
-                          value={formData.gender}
-                          onValueChange={(value) =>
-                            updateFormData("gender", value)
-                          }
-                        >
-                          <SelectTrigger
-                            className={
-                              errors.gender ? "border-destructive" : ""
-                            }
-                          >
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {GENDERS.map((g) => (
-                              <SelectItem key={g} value={g}>
-                                {g}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.gender && (
-                          <p className="text-sm text-destructive">
-                            {errors.gender}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="bloodType">{t("Auth.bloodType")} *</Label>
-                        <Select
-                          value={formData.bloodType}
-                          onValueChange={(value) =>
-                            updateFormData("bloodType", value)
-                          }
-                        >
-                          <SelectTrigger
-                            className={
-                              errors.bloodType ? "border-destructive" : ""
-                            }
-                          >
-                            <SelectValue placeholder="Select blood type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {BLOOD_TYPES.map((type) => (
-                              <SelectItem key={type} value={type}>
-                                {type}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.bloodType && (
-                          <p className="text-sm text-destructive">
-                            {errors.bloodType}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="email">{t("Auth.email")} *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={formData.email}
-                          onChange={(e) =>
-                            updateFormData("email", e.target.value)
-                          }
-                          className={errors.email ? "border-destructive" : ""}
-                        />
-                        {errors.email && (
-                          <p className="text-sm text-destructive">
-                            {errors.email}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
+            {/* Section 2: Parent's Information */}
+            {currentSection === 2 && (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Father's Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="password">{t("Auth.Password")} *</Label>
+                      <Label htmlFor="fatherName">Father's Name</Label>
                       <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={formData.password}
-                        onChange={(e) =>
-                          updateFormData("password", e.target.value)
-                        }
-                        className={errors.password ? "border-destructive" : ""}
-                      />
-                      {errors.password && (
-                        <p className="text-sm text-destructive">
-                          {errors.password}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="space-y-3 pt-2">
-                      <Label>{t("Auth.Iam")}</Label>
-                      <RadioGroup
-                        value={role}
-                        onValueChange={(value) => setRole(value as AppRole)}
-                        className="grid grid-cols-2 gap-4"
-                      >
-                        <div>
-                          <RadioGroupItem
-                            value="swimmer"
-                            id="swimmer"
-                            className="peer sr-only"
-                          />
-                          <Label
-                            htmlFor="swimmer"
-                            className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-colors"
-                          >
-                            <User className="mb-2 h-6 w-6" />
-                            <span className="font-medium">{t("Auth.Swimmer")}</span>
-                          </Label>
-                        </div>
-                        <div>
-                          <RadioGroupItem
-                            value="coach"
-                            id="coach"
-                            className="peer sr-only"
-                          />
-                          <Label
-                            htmlFor="coach"
-                            className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer transition-colors"
-                          >
-                            <Users className="mb-2 h-6 w-6" />
-                            <span className="font-medium">{t("Auth.Coach")}</span>
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                  </div>
-                )}
-
-                {/* Section 2: Parent's Information */}
-                {currentSection === 2 && (
-                  <div className="space-y-4">
-                    <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
-                      <h3 className="font-semibold text-foreground mb-3">
-                        {t("Auth.FatherInfo")}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="fatherName">{t("Auth.Fname")}</Label>
-                          <Input
-                            id="fatherName"
-                            type="text"
-                            placeholder="Father's full name"
-                            value={formData.fatherName}
-                            onChange={(e) =>
-                              updateFormData("fatherName", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="fatherNationalId">
-                            {t("Auth.FNid")}
-                          </Label>
-                          <Input
-                            id="fatherNationalId"
-                            type="text"
-                            placeholder={t("Auth.FNid")}
-                            value={formData.fatherNationalId}
-                            onChange={(e) =>
-                              updateFormData("fatherNationalId", e.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-lg p-4 border border-border/50">
-                      <h3 className="font-semibold text-foreground mb-3">
-                        {t("Auth.MotherInfo")}
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="motherName">{t("Auth.Mname")}</Label>
-                          <Input
-                            id="motherName"
-                            type="text"
-                            placeholder="Mother's full name"
-                            value={formData.motherName}
-                            onChange={(e) =>
-                              updateFormData("motherName", e.target.value)
-                            }
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="motherNationalId">
-                            {t("Auth.MNid")}
-                          </Label>
-                          <Input
-                            id="motherNationalId"
-                            type="text"
-                            placeholder="Mother's National ID"
-                            value={formData.motherNationalId}
-                            onChange={(e) =>
-                              updateFormData("motherNationalId", e.target.value)
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Section 3: Medical History */}
-                {currentSection === 3 && (
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="allergies">{t("Auth.Allergies")}</Label>
-                      <Textarea
-                        id="allergies"
-                        placeholder={t("Auth.Allergies")}
-                        value={formData.allergies}
-                        onChange={(e) =>
-                          updateFormData("allergies", e.target.value)
-                        }
-                        rows={3}
+                        id="fatherName"
+                        placeholder="Enter father's name"
+                        value={formData.fatherName}
+                        onChange={(e) => updateFormData("fatherName", e.target.value)}
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="previousSurgeries">
-                        {t("Auth.Psurgery")}
-                      </Label>
-                      <Textarea
-                        id="previousSurgeries"
-                        placeholder={t("Auth.Psurgery")}
-                        value={formData.previousSurgeries}
-                        onChange={(e) =>
-                          updateFormData("previousSurgeries", e.target.value)
-                        }
-                        rows={3}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="chronicDiseases">{t("Auth.ChronicDiseases")}</Label>
-                      <Textarea
-                        id="chronicDiseases"
-                        placeholder={t("Auth.ChronicDiseases")}
-                        value={formData.chronicDiseases}
-                        onChange={(e) =>
-                          updateFormData("chronicDiseases", e.target.value)
-                        }
-                        rows={3}
+                      <Label htmlFor="fatherNationalId">Father's National ID</Label>
+                      <Input
+                        id="fatherNationalId"
+                        placeholder="Enter father's national ID"
+                        value={formData.fatherNationalId}
+                        onChange={(e) => updateFormData("fatherNationalId", e.target.value)}
                       />
                     </div>
                   </div>
-                )}
-              </>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Mother's Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="motherName">Mother's Name</Label>
+                      <Input
+                        id="motherName"
+                        placeholder="Enter mother's name"
+                        value={formData.motherName}
+                        onChange={(e) => updateFormData("motherName", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="motherNationalId">Mother's National ID</Label>
+                      <Input
+                        id="motherNationalId"
+                        placeholder="Enter mother's national ID"
+                        value={formData.motherNationalId}
+                        onChange={(e) => updateFormData("motherNationalId", e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Section 3: Medical History */}
+            {currentSection === 3 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="allergies">Allergies</Label>
+                  <Textarea
+                    id="allergies"
+                    placeholder="List any allergies you have"
+                    value={formData.allergies}
+                    onChange={(e) => updateFormData("allergies", e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="previousSurgeries">Previous Surgeries</Label>
+                  <Textarea
+                    id="previousSurgeries"
+                    placeholder="List any previous surgeries"
+                    value={formData.previousSurgeries}
+                    onChange={(e) => updateFormData("previousSurgeries", e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="chronicDiseases">Chronic Diseases</Label>
+                  <Textarea
+                    id="chronicDiseases"
+                    placeholder="List any chronic diseases"
+                    value={formData.chronicDiseases}
+                    onChange={(e) => updateFormData("chronicDiseases", e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </div>
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex gap-3 pt-2">
-              {!isLogin && currentSection > 1 && (
+            <div className="flex gap-3 pt-4">
+              {currentSection > 1 && (
                 <Button
                   type="button"
                   variant="outline"
@@ -698,45 +610,28 @@ export default function Auth() {
                   className="flex-1"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
-                  {t("buttons.Previous")}
+                  Previous
                 </Button>
               )}
 
               <Button
                 type="submit"
-                className="flex-1 gradient-ocean hover:opacity-90 transition-opacity"
+                className="flex-1 gradient-ocean hover:opacity-90 transition-opacity text-white"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   "Please wait..."
-                ) : isLogin ? (
-                  <>{t("buttons.SignIn")}</>
                 ) : currentSection < 3 ? (
                   <>
-                    {t("buttons.Next")}
+                    Next
                     <ChevronRight className="w-4 h-4 ml-2" />
                   </>
                 ) : (
-                  <>{t("Auth.CreateAccount")}</>
+                  "Create Account"
                 )}
               </Button>
             </div>
           </form>
-
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setIsLogin(!isLogin);
-                resetForm();
-              }}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {isLogin
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
-            </button>
-          </div>
         </CardContent>
       </Card>
     </div>
