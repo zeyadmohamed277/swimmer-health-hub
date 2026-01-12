@@ -1,0 +1,98 @@
+{
+  "appName": "Swimmer Health Hub",
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "swimmers": "Swimmers",
+    "medicalRecords": "Medical Records",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "home": {
+    "SwimHealth": "SwimHealth",
+    "subtitle": "Professional swimmer health management system for tracking medical assessments, in-body examinations, and performance metrics.",
+    "getStarted": "Get Started",
+    "Sign In": "Sign In",
+    "Swimmer Profiles": "Swimmer Profiles",
+    "Profile descriptions": "Complete profiles with contact information and emergency data.",
+    "In-Body Analysis": "In-Body Analysis",
+    "tracking": "Track body composition including weight, muscle mass, and body fat percentage.",
+    "Medical Tracking": "Medical Tracking",
+    "medicalTrackingDesc": "Manage medical records and examination files easily.",
+    "Coach Dashboard": "Coach Dashboard",
+    "dashboardDesc": "Monitor swimmer performance and health metrics from one place.",
+    "Secure & Private": "Secure & Private",
+    "secureDesc": "Ensures role-based access control so swimmers only see their own data.",
+    "Ready to Start?": "Ready to Start?",
+    "joinUsDesc": "Create your account and start tracking your health metrics today",
+    "createAccount": "Create Account"
+  },
+  "buttons": {
+    "upload": "Upload",
+    "save": "Save",
+    "cancel": "Cancel",
+    "viewAll": "View All",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addNew": "Add New",
+    "changeLang": "Change Language",
+    "SignIn": "Sign In",
+    "Next": "Next",
+    "Previous": "Previous"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone Number"
+  },
+  "Auth": {
+    "title":"Welcome Back",
+    "subtitle":"Sign in to access your swimmer health dashboard",
+    "name": "Full Name",
+    "age": "Age",
+    "gender": "Gender",
+    "email": "Email",
+    "Password": "Password",
+    "DOB": "Date of Birth",
+    "nationalId": "National ID",
+    "bloodType": "Blood Type",
+    "allergies": "Allergies",
+    "Iam":"I am  ",
+    "Swimmer":"Swimmer",
+    "Coach":"Coach",
+    "FatherInfo":"Father's Information",
+    "MotherInfo":"Mother's Information",
+    "Fname":"Father's Name",
+    "Mname":"Mother's Name",
+    "FNid":"Father's National ID",
+    "MNid":"Mother's National ID",
+    "Allergies":"Known Allergies",
+    "Psurgery":"Previous Surgeries",
+    "ChronicDiseases":"Chronic Diseases",
+    "CreateAccount":"Create Account",
+    "PersonalInfo":"Personal Information",
+    "ParentInfo":"Parent's Information",
+    "PNID":"Enter National ID"
+  },
+  "medical": {
+    "records": "Medical Records",
+    "uploadFiles": "Upload and manage your medical files",
+    "noFiles": "No files uploaded",
+    "acceptedTypes": "Accepted: PDF, JPG, PNG, GIF"
+  },
+  "healthMetrics": {
+    "title": "Health Metrics",
+    "weight": "Weight",
+    "height": "Height",
+    "bmi": "BMI",
+    "pulse": "Pulse",
+    "bloodPressure": "Blood Pressure"
+  },
+  "alerts": {
+    "successUpload": "Files uploaded successfully",
+    "failUpload": "Failed to upload files",
+    "requiredField": "This field is required"
+  }
+}
