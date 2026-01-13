@@ -111,6 +111,7 @@ export default function SwimmerProfile() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+
         {/* Profile Header */}
         <Card className="overflow-hidden">
           <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8">
@@ -144,6 +145,7 @@ export default function SwimmerProfile() {
 
         {/* Medical History Section */}
         <div className="grid gap-6 md:grid-cols-2">
+
           {/* Health Conditions */}
           <Card>
             <CardHeader>
@@ -207,7 +209,6 @@ export default function SwimmerProfile() {
                 </form>
             </CardContent>
           </Card>
-
 
           <Card>
             <CardHeader>

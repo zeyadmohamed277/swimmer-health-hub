@@ -219,17 +219,6 @@ export default function Auth() {
     return (
       <div className="min-h-screen gradient-ocean-vertical flex items-center justify-center p-4">
         <div className="w-full max-w-4xl">
-          <button
-                  onClick={toggleLanguage}
-                  className="
-        px-3 py-1 rounded-md text-sm font-semibold
-        border border-gray-300 dark:border-gray-700
-        hover:bg-gray-100 dark:hover:bg-gray-800
-        text-black
-      "
-                >
-                  {lang === "en" ? "AR" : "EN"}
-                </button>
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
               <div className="p-4 gradient-ocean backdrop-blur-sm rounded-full animate-float">
@@ -298,17 +287,6 @@ export default function Auth() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-amber-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-xl border-0">
-           <button
-                  onClick={toggleLanguage}
-                  className="
-        px-3 py-1 rounded-md text-sm font-semibold
-        border border-gray-300 dark:border-gray-700
-        hover:bg-gray-100 dark:hover:bg-gray-800
-        text-black m-5
-      "
-                >
-                  {lang === "en" ? "AR" : "EN"}
-                </button>
           <CardHeader className="text-center pb-2">
             <button
               onClick={handleBackToRoleSelection}

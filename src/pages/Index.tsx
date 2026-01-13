@@ -16,8 +16,6 @@ import {
   Activity,
   Shield,
   TrendingUp,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -105,16 +103,7 @@ export default function Index() {
             </CardHeader>
           </Card>
 
-          <Card className="animate-fade-in border-border/50 hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <Activity className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>{t("home.In-Body Analysis")}</CardTitle>
-              <CardDescription>{t("home.tracking")}</CardDescription>
-            </CardHeader>
-          </Card>
-
+        
           <Card className="animate-fade-in border-border/50 hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
@@ -133,30 +122,6 @@ export default function Index() {
               <CardTitle>{t("home.Coach Dashboard")}</CardTitle>
               <CardDescription>{t("home.dashboardDesc")}</CardDescription>
             </CardHeader>
-          </Card>
-
-          <Card className="animate-fade-in border-border/50 hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <Shield className="w-6 h-6 text-primary" />
-              </div>
-              <CardTitle>{t("home.Secure & Private")}</CardTitle>
-              <CardDescription>{t("home.secureDesc")}</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="animate-fade-in border-border/50 hover:shadow-md transition-shadow bg-gradient-to-br from-primary/5 to-accent/5">
-            <CardHeader>
-              <CardTitle className="text-primary">
-                {t("home.Ready to Start?")}
-              </CardTitle>
-              <CardDescription>{t("home.joinUsDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to="/auth">
-                <Button className="w-full">{t("home.createAccount")}</Button>
-              </Link>
-            </CardContent>
           </Card>
         </div>
       </div>
