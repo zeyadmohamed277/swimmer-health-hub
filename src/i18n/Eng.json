@@ -51,7 +51,7 @@
   "Auth": {
     "title":"Welcome to SwimHealth",
     "subtitle":"Choose your role to get started",
-    "name": "Full Name",
+    "Ename": "Full Name in English",
     "age": "Age",
     "gender": "Gender",
     "email": "Email",
@@ -81,7 +81,7 @@
     "PNID":"Enter National ID",
     "CSignup":"Coach Sign Up",
     "CSdesc":"Enter your credentials to access the dashboard",
-    "SSignup":"Swimmer Sign Up"
+    "SSignup":"Swimmer registration"
   },
   "medical": {
     "records": "Medical Records",

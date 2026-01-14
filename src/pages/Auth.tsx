@@ -341,6 +341,9 @@ export default function Auth() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white"
                 disabled={isSubmitting}
+                onClick={() => {
+                  navigate("/dashboard");
+                }}
               >
                 {isSubmitting ? "Signing in..." : t("buttons.Continue")}
               </Button>
@@ -368,15 +371,15 @@ export default function Auth() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
-            Swimmer Registration
+            {t("Auth.SSignup")}
           </CardTitle>
           <CardDescription>
             Step {currentSection} of 3:{" "}
             {currentSection === 1
-              ? "Personal Information"
+              ? t("Auth.PersonalInfo")
               : currentSection === 2
-              ? "Parent's Information"
-              : "Medical History"}
+              ? t("Auth.ParentInfo")
+              : t("Auth.MedicalHistory")}
           </CardDescription>
 
           {/* Progress Steps */}
@@ -401,10 +404,10 @@ export default function Auth() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Label htmlFor="fullName">{t("Auth.Ename")}</Label>
                     <Input
                       id="fullName"
-                      placeholder="Enter your full name"
+                      placeholder={t("Auth.Ename")}
                       value={formData.fullName}
                       onChange={(e) =>
                         updateFormData("fullName", e.target.value)
@@ -419,10 +422,10 @@ export default function Auth() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="nationalId">National ID *</Label>
+                    <Label htmlFor="nationalId">{t("Auth.nationalId")}</Label>
                     <Input
                       id="nationalId"
-                      placeholder="Enter your national ID"
+                      placeholder={t("Auth.PNID")}
                       value={formData.nationalId}
                       onChange={(e) =>
                         updateFormData("nationalId", e.target.value)
@@ -439,7 +442,7 @@ export default function Auth() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                    <Label htmlFor="dateOfBirth">{t("Auth.DOB")}</Label>
                     <Input
                       id="dateOfBirth"
                       type="date"
@@ -457,7 +460,7 @@ export default function Auth() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Gender *</Label>
+                    <Label>{t("Auth.gender")} *</Label>
                     <Select
                       value={formData.gender}
                       onValueChange={(value) => updateFormData("gender", value)}
@@ -485,7 +488,7 @@ export default function Auth() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Blood Type *</Label>
+                    <Label>{t("Auth.bloodType")} *</Label>
                     <Select
                       value={formData.bloodType}
                       onValueChange={(value) =>
@@ -513,7 +516,7 @@ export default function Auth() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
+                    <Label htmlFor="email">{t("Auth.email")} *</Label>
                     <Input
                       id="email"
                       type="email"
@@ -529,7 +532,7 @@ export default function Auth() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password *</Label>
+                  <Label htmlFor="password">{t("Auth.Password")} *</Label>
                   <Input
                     id="password"
                     type="password"
@@ -553,14 +556,14 @@ export default function Auth() {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-foreground flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Father's Information
+                    {t("Auth.FatherInfo")}
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="fatherName">Father's Name</Label>
+                      <Label htmlFor="fatherName">{t("Auth.Fname")}</Label>
                       <Input
                         id="fatherName"
-                        placeholder="Enter father's name"
+                        placeholder={t("Auth.Fname")}
                         value={formData.fatherName}
                         onChange={(e) =>
                           updateFormData("fatherName", e.target.value)
@@ -569,11 +572,11 @@ export default function Auth() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="fatherNationalId">
-                        Father's National ID
+                        {t("Auth.FNid")}
                       </Label>
                       <Input
                         id="fatherNationalId"
-                        placeholder="Enter father's national ID"
+                        placeholder={t("Auth.FNid")}
                         value={formData.fatherNationalId}
                         onChange={(e) =>
                           updateFormData("fatherNationalId", e.target.value)
@@ -586,14 +589,14 @@ export default function Auth() {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-foreground flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Mother's Information
+                    {t("Auth.MotherInfo")}
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="motherName">Mother's Name</Label>
+                      <Label htmlFor="motherName">{t("Auth.Mname")}</Label>
                       <Input
                         id="motherName"
-                        placeholder="Enter mother's name"
+                        placeholder={t("Auth.Mname")}
                         value={formData.motherName}
                         onChange={(e) =>
                           updateFormData("motherName", e.target.value)
@@ -602,11 +605,11 @@ export default function Auth() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="motherNationalId">
-                        Mother's National ID
+                        {t("Auth.MNid")}
                       </Label>
                       <Input
                         id="motherNationalId"
-                        placeholder="Enter mother's national ID"
+                        placeholder={t("Auth.MNid")}
                         value={formData.motherNationalId}
                         onChange={(e) =>
                           updateFormData("motherNationalId", e.target.value)
@@ -622,10 +625,10 @@ export default function Auth() {
             {currentSection === 3 && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="allergies">Allergies</Label>
+                  <Label htmlFor="allergies">{t("Auth.Allergies")}</Label>
                   <Textarea
                     id="allergies"
-                    placeholder="List any allergies you have"
+                    placeholder={t("Auth.Allergies")}
                     value={formData.allergies}
                     onChange={(e) =>
                       updateFormData("allergies", e.target.value)
@@ -635,10 +638,10 @@ export default function Auth() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="previousSurgeries">Previous Surgeries</Label>
+                  <Label htmlFor="previousSurgeries">{t("Auth.PreviousSurgeries")}</Label>
                   <Textarea
                     id="previousSurgeries"
-                    placeholder="List any previous surgeries"
+                    placeholder={t("Auth.PreviousSurgeries")}
                     value={formData.previousSurgeries}
                     onChange={(e) =>
                       updateFormData("previousSurgeries", e.target.value)
@@ -648,10 +651,10 @@ export default function Auth() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="chronicDiseases">Chronic Diseases</Label>
+                  <Label htmlFor="chronicDiseases">{t("Auth.ChronicDiseases")}</Label>
                   <Textarea
                     id="chronicDiseases"
-                    placeholder="List any chronic diseases"
+                    placeholder={t("Auth.ChronicDiseases")}
                     value={formData.chronicDiseases}
                     onChange={(e) =>
                       updateFormData("chronicDiseases", e.target.value)
@@ -672,7 +675,7 @@ export default function Auth() {
                   className="flex-1"
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
-                  Previous
+                  {t("buttons.previous")}
                 </Button>
               )}
 

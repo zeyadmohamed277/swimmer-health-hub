@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { User, Calendar, Phone, AlertCircle, Heart, Pill, Stethoscope, Syringe } from 'lucide-react';
 import { format } from 'date-fns';
-
+import { useLocation } from "react-router-dom";
 
 
 
@@ -59,6 +59,12 @@ export default function SwimmerProfile() {
   const [medicalResults, setMedicalResults] = useState<MedicalResult[]>([]);
   const [loading, setLoading] = useState(true);
 
+const location = useLocation();
+const swimmer = location.state?.swimmer;
+
+if (!swimmer) {
+  return <p>No swimmer data found</p>;
+}
   useEffect(() => {
     if (user) {
       fetchData();
